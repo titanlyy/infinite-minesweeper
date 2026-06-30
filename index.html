@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="Infinite Minesweeper — an endless, procedurally generated browser Minesweeper game." />
+  <title>Infinite Minesweeper</title>
+  <link rel="stylesheet" href="styles/tokens.css" />
+  <link rel="stylesheet" href="styles/base.css" />
+  <link rel="stylesheet" href="styles/hud.css" />
+  <link rel="stylesheet" href="styles/modals.css" />
+  <link rel="stylesheet" href="styles/themes.css" />
+</head>
+<body>
+
+  <!-- ═══ LANDING SCREEN ═══ -->
+  <div id="screen-landing" class="screen active">
+    <div class="landing-inner">
+      <div class="logo">🧨 <span>Infinite Minesweeper</span></div>
+      <p class="tagline">An endless minefield. How far can you go?</p>
+      <div class="mode-cards">
+        <button class="mode-card" data-mode="endless">
+          <span class="mode-icon">♾️</span>
+          <strong>Endless</strong>
+          <small>Explore forever. Survive as long as you can.</small>
+        </button>
+        <button class="mode-card" data-mode="daily">
+          <span class="mode-icon">📅</span>
+          <strong>Daily Challenge</strong>
+          <small>Same seed for everyone today.</small>
+        </button>
+        <button class="mode-card" data-mode="private">
+          <span class="mode-icon">🔗</span>
+          <strong>Private Room</strong>
+          <small>Invite friends to the same board.</small>
+        </button>
+      </div>
+      <div class="landing-footer">
+        <button id="btn-theme" class="icon-btn" title="Toggle theme">🌗</button>
+        <button id="btn-sound" class="icon-btn" title="Toggle sound">🔊</button>
+        <button id="btn-accessibility" class="icon-btn" title="Accessibility">♿</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ GAME SCREEN ═══ -->
+  <div id="screen-game" class="screen">
+
+    <!-- HUD Top Bar -->
+    <header id="hud" class="hud-bar">
+      <div class="hud-left">
+        <button id="btn-menu" class="icon-btn" title="Menu">☰</button>
+        <div class="hud-block">
+          <span class="hud-label">Score</span>
+          <span id="hud-score" class="hud-value">0</span>
+        </div>
+      </div>
+      <div class="hud-center">
+        <div class="hud-block">
+          <span class="hud-label">Time</span>
+          <span id="hud-timer" class="hud-value">00:00</span>
+        </div>
+      </div>
+      <div class="hud-right">
+        <div class="hud-block">
+          <span class="hud-label">Mines</span>
+          <span id="hud-mines" class="hud-value">—</span>
+        </div>
+        <div class="hud-block">
+          <span class="hud-label">Streak</span>
+          <span id="hud-streak" class="hud-value">0🔥</span>
+        </div>
+        <button id="btn-settings" class="icon-btn" title="Settings">⚙️</button>
+      </div>
+    </header>
+
+    <!-- Board Canvas -->
+    <canvas id="game-canvas"></canvas>
+
+    <!-- Mini-map -->
+    <div id="minimap-container" class="minimap-container hidden">
+      <canvas id="minimap-canvas" width="160" height="160"></canvas>
+      <span id="minimap-label" class="minimap-label">0, 0</span>
+    </div>
+
+    <!-- Bottom Dock (mobile + flag toggle) -->
+    <div class="bottom-dock">
+      <button id="btn-flag-toggle" class="dock-btn" title="Toggle flag mode">🚩 Flag</button>
+      <button id="btn-minimap-toggle" class="dock-btn" title="Toggle mini-map">🗺️</button>
+      <button id="btn-zoom-in" class="dock-btn" title="Zoom in">＋</button>
+      <button id="btn-zoom-out" class="dock-btn" title="Zoom out">－</button>
+      <button id="btn-recenter" class="dock-btn" title="Re-center board">◎</button>
+    </div>
+
+  </div>
+
+  <!-- ═══ SETTINGS DRAWER ═══ -->
+  <aside id="settings-drawer" class="drawer hidden" role="dialog" aria-label="Settings">
+    <div class="drawer-header">
+      <h2>Settings</h2>
+      <button id="btn-settings-close" class="icon-btn">✕</button>
+    </div>
+    <div class="drawer-body">
+      <section>
+        <h3>Audio</h3>
+        <label class="toggle-row">
+          <span>Sound Effects</span>
+          <input type="checkbox" id="setting-sfx" checked />
+        </label>
+        <label class="toggle-row">
+          <span>Ambient Music</span>
+          <input type="checkbox" id="setting-music" />
+        </label>
+      </section>
+      <section>
+        <h3>Visual Theme</h3>
+        <div class="theme-options">
+          <button class="theme-btn" data-theme="dark">Dark</button>
+          <button class="theme-btn" data-theme="light">Light</button>
+          <button class="theme-btn" data-theme="neon">Neon</button>
+          <button class="theme-btn" data-theme="hc">High Contrast</button>
+        </div>
+      </section>
+      <section>
+        <h3>Gameplay</h3>
+        <label class="toggle-row">
+          <span>Reduced Motion</span>
+          <input type="checkbox" id="setting-reduce-motion" />
+        </label>
+        <label class="toggle-row">
+          <span>Long-press to Flag</span>
+          <input type="checkbox" id="setting-longpress" checked />
+        </label>
+        <label class="setting-row">
+          <span>Mine Density</span>
+          <input type="range" id="setting-density" min="10" max="30" value="15" />
+          <span id="setting-density-label">15%</span>
+        </label>
+      </section>
+      <section>
+        <h3>Session</h3>
+        <label class="setting-row">
+          <span>Seed</span>
+          <input type="text" id="setting-seed" maxlength="16" placeholder="auto" />
+        </label>
+        <button id="btn-new-game" class="btn-primary">New Game</button>
+      </section>
+    </div>
+  </aside>
+
+  <!-- ═══ TUTORIAL OVERLAY ═══ -->
+  <div id="modal-tutorial" class="modal hidden" role="dialog" aria-label="How to play">
+    <div class="modal-card">
+      <button class="modal-close" data-modal="tutorial">✕</button>
+      <div class="tutorial-steps">
+        <div class="tutorial-step active" data-step="0">
+          <div class="tutorial-icon">👆</div>
+          <h3>Reveal Cells</h3>
+          <p>Click or tap a cell to reveal it. Numbers show nearby mine count.</p>
+        </div>
+        <div class="tutorial-step" data-step="1">
+          <div class="tutorial-icon">🚩</div>
+          <h3>Flag Mines</h3>
+          <p>Right-click (or long-press on mobile) to place a flag on a suspected mine.</p>
+        </div>
+        <div class="tutorial-step" data-step="2">
+          <div class="tutorial-icon">🗺️</div>
+          <h3>Explore Infinitely</h3>
+          <p>Drag to pan, scroll or pinch to zoom. The board never ends.</p>
+        </div>
+        <div class="tutorial-step" data-step="3">
+          <div class="tutorial-icon">🏆</div>
+          <h3>Score &amp; Streaks</h3>
+          <p>Reveal safe cells in a row to build streaks. Enter new sectors for bonus points.</p>
+        </div>
+      </div>
+      <div class="tutorial-nav">
+        <div class="tutorial-dots">
+          <span class="dot active" data-step="0"></span>
+          <span class="dot" data-step="1"></span>
+          <span class="dot" data-step="2"></span>
+          <span class="dot" data-step="3"></span>
+        </div>
+        <button id="btn-tutorial-next" class="btn-primary">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ RESULTS MODAL ═══ -->
+  <div id="modal-results" class="modal hidden" role="dialog" aria-label="Game over">
+    <div class="modal-card results-card">
+      <div id="result-state" class="result-state">💥 Game Over</div>
+      <div class="result-stats">
+        <div class="stat-block"><span class="stat-label">Score</span><span id="result-score" class="stat-value">0</span></div>
+        <div class="stat-block"><span class="stat-label">Time</span><span id="result-time" class="stat-value">0:00</span></div>
+        <div class="stat-block"><span class="stat-label">Best Streak</span><span id="result-streak" class="stat-value">0</span></div>
+        <div class="stat-block"><span class="stat-label">Sectors</span><span id="result-sectors" class="stat-value">0</span></div>
+      </div>
+      <div class="result-actions">
+        <button id="btn-play-again" class="btn-primary">Play Again</button>
+        <button id="btn-same-seed" class="btn-secondary">Same Seed</button>
+        <button id="btn-share-result" class="btn-secondary">Share</button>
+        <button id="btn-home" class="btn-secondary">Home</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SCRIPTS ═══ -->
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
